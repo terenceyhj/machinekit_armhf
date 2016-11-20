@@ -1,0 +1,39 @@
+sudo: required
+
+notifications:
+  email: 
+    on_success: never
+    on_failure: always
+  webhooks:
+    urls:
+      - $GITTER_IM_URL
+    on_success: change
+    on_failure: always
+    on_start: never
+
+language: bash
+
+services:
+- docker
+
+before_install:
+  - gem install package_cloud
+  - pip install --user travispy
+
+env:
+  global:
+    - JOBS=2
+    - CHROOT_PATH=/opt/rootfs
+    - MACHINEKIT_PATH=/usr/src/machinekit
+    - TRAVIS_DIR=.travis
+    - DOCKER_IMAGE=kinsamanka/mkdocker
+  matrix:
+    - TAG=wheezy-64    CMD=run_tests
+    - TAG=wheezy-64    CMD=build_deb
+    - TAG=wheezy-32    CMD=build_deb
+    - TAG=wheezy-armhf CMD=build_deb FLAV=posix
+    - TAG=wheezy-armhf CMD=build_deb FLAV=xenomai
+    - TAG=wheezy-armhf CMD=build_deb FLAV=rt_preempt
+
+script:
+- .travis/docker_run.sh
